@@ -32,12 +32,13 @@ function lastNumber(line: string) {
 }
 
 export function part1(input: string) {
-  return input.split("\n").reduce((sum, line) => sum + extractNumberPart1(line), 0);
+  return input
+    .split("\n")
+    .reduce((sum, line) => sum + extractNumberPart1(line), 0);
 }
 
 export function part2(input: string) {
-  return input.split("\n").reduce(
-    (sum, line) => sum + firstNumber(line) * 10 + lastNumber(line),
-    0
-  );
+  return input
+    .split("\n")
+    .reduce((sum, line) => sum + firstNumber(line) * 10 + lastNumber(line), 0);
 }
