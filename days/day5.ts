@@ -64,10 +64,17 @@ export function part2(input: string) {
     }
     return false;
   };
-  // I think lowest location will correspond to some lower bound in a mapping
-  const candidateSeeds = mapMatrix
-    .flatMap((mappings, i) =>
-      mappings.map((m) => lookupSeed(mapMatrix.slice(0, i + 1), m.destStart))
+  // Lowest location will correspond to some endpoint boundary
+  const candidateSeeds = seeds
+    .filter((_, i) => i % 2 === 0) // Add seed endpoints
+    .concat(
+      mapMatrix.flatMap((mappings, i) =>
+        mappings.flatMap((m) => [
+          // For each [a, b] range in each mapping, map [a, b+1] to their seed values
+          lookupSeed(mapMatrix.slice(0, i + 1), m.destStart),
+          lookupSeed(mapMatrix.slice(0, i + 1), m.destEnd) + 1,
+        ])
+      )
     )
     .filter(validSeed);
 

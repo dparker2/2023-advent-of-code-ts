@@ -42,3 +42,57 @@ test("part1", () => {
 test("part2", () => {
   expect(part2(input)).toBe(46);
 });
+
+test("part2 upper bound is min", () => {
+  expect(
+    part2(`seeds: 1 100
+
+seed-to-soil map:
+0 0 10
+
+soil-to-fertilizer map:
+0 0 10
+
+fertilizer-to-water map:
+0 0 10
+
+water-to-light map:
+0 0 10
+
+light-to-temperature map:
+0 0 10
+
+temperature-to-humidity map:
+0 0 10
+
+humidity-to-location map:
+200 0 100`)
+  ).toBe(100);
+});
+
+test("part2 lower bound is min", () => {
+  expect(
+    part2(`seeds: 1 100
+
+seed-to-location map:
+10 10 10
+
+soil-to-fertilizer map:
+10 10 10
+
+fertilizer-to-water map:
+10 10 10
+
+water-to-light map:
+10 10 10
+
+light-to-temperature map:
+10 10 10
+
+temperature-to-humidity map:
+10 10 10
+
+humidity-to-location map:
+200 5 95`)
+  ).toBe(1);
+});
