@@ -67,10 +67,7 @@ export function part2(input: string) {
   // I think lowest location will correspond to some lower bound in a mapping
   const candidateSeeds = mapMatrix
     .flatMap((mappings, i) =>
-      mappings.flatMap((m) => [
-        lookupSeed(mapMatrix.slice(0, i + 1), m.srcStart),
-        lookupSeed(mapMatrix.slice(0, i + 1), m.destStart),
-      ])
+      mappings.map((m) => lookupSeed(mapMatrix.slice(0, i + 1), m.destStart))
     )
     .filter(validSeed);
 
