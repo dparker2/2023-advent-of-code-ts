@@ -51,6 +51,16 @@ function lookupSeed(mapMatrix: Mapping[][], val: number) {
   }, val);
 }
 
+// For viz...
+export function data(input: string) {
+  const { mapMatrix } = parseInput(input);
+  for (let i = 0; i < mapMatrix.length; i++) {
+    for (let j = 0; j < 100; j++) {
+      console.log(lookupLocation(mapMatrix.slice(0, i + 1), j));
+    }
+  }
+}
+
 export function part1(input: string) {
   const { seeds, mapMatrix } = parseInput(input);
   return Math.min(...seeds.map((s) => lookupLocation(mapMatrix, s)));
