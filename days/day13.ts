@@ -10,29 +10,43 @@ function parseInput(input: string) {
   return grids;
 }
 
-function reflectionLength(list: string[]) {
-  let i;
-  let j;
-  for (i = 0, j = 1; j < list.length; i++, j++) {
-    if (list[i] === list[j]) break;
-  }
-  if (list[j] === undefined) return 0; // Could not mirror
+function reflectionLength(list: string[], part2: boolean) {
+  findMirror: for (let i = 1; i < list.length; i++) {
+    const s1 = list.slice(0, i).join("");
+    const s2 = list
+      .slice(i, list.length)
+      .map((x) => x.split("").toReversed().join(""))
+      .join("");
 
-  for (let k = i, l = j; k >= 0 && l < list.length; k--, l++) {
-    if (list[k] !== list[l]) return 0; // Not a perfect mirror
+    let smudgeFixed = !part2;
+    for (let j = 0; j < Math.min(s1.length, s2.length); j++) {
+      if (s1.at(-j - 1) !== s2[j]) {
+        if (!smudgeFixed) {
+          smudgeFixed = true; // For part 2, allow one unequal
+          continue;
+        }
+        continue findMirror;
+      }
+    }
+    if (smudgeFixed) return i;
   }
-  return i + 1;
+  return 0;
 }
 
 export function part1(input: string) {
   const grids = parseInput(input);
   return grids.reduce(
     (sum, { rows, cols }) =>
-      sum + reflectionLength(cols) + 100 * reflectionLength(rows),
+      sum + reflectionLength(cols, false) + 100 * reflectionLength(rows, false),
     0
   );
 }
 
 export function part2(input: string) {
-  return 0;
+  const grids = parseInput(input);
+  return grids.reduce(
+    (sum, { rows, cols }) =>
+      sum + reflectionLength(cols, true) + 100 * reflectionLength(rows, true),
+    0
+  );
 }
