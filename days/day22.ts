@@ -1,4 +1,4 @@
-import { sortBy, bisectLeft } from "../util/array";
+import { sortBy } from "../util/array";
 
 type Brick = { x: number; y: number; z: number }[];
 
@@ -25,7 +25,9 @@ function supporting(b1: Brick, b2: Brick) {
   );
 }
 
-function reconcile(bricks: Brick[], stable: Set<Brick>, falling: Set<Brick>) {
+function reconcile(bricks: Brick[]) {
+  const stable = new Set<Brick>(bricks.filter(([{ z }]) => z === 1));
+  const falling = new Set<Brick>(bricks.filter(([{ z }]) => z > 1));
   sortBy(bricks, ([{ z }]) => z);
   for (let i = 0; i < bricks.length; i++) {
     if (falling.has(bricks[i])) {
@@ -42,13 +44,12 @@ function reconcile(bricks: Brick[], stable: Set<Brick>, falling: Set<Brick>) {
       }
     }
   }
+  return [stable, falling];
 }
 
-function simulate(bricks: Brick[]): [Brick[], boolean] {
-  const stable = new Set<Brick>(bricks.filter(([{ z }]) => z === 1));
-  const falling = new Set<Brick>(bricks.filter(([{ z }]) => z > 1));
-  reconcile(bricks, stable, falling);
-  if (falling.size === 0) return [bricks, false]; // Already stable
+function simulate(bricks: Brick[]): Brick[] {
+  let [stable, falling] = reconcile(bricks);
+  if (falling.size === 0) return bricks; // Already stable
   while (falling.size > 0) {
     for (let i = 0; i < bricks.length; i++) {
       if (falling.has(bricks[i])) {
@@ -56,13 +57,13 @@ function simulate(bricks: Brick[]): [Brick[], boolean] {
         bricks[i][1].z -= 1;
       }
     }
-    reconcile(bricks, stable, falling);
+    [stable, falling] = reconcile(bricks);
   }
-  return [bricks, true];
+  return bricks;
 }
 
 export function part1(input: string) {
-  const [bricks, _] = simulate(parseInput(input));
+  const bricks = simulate(parseInput(input));
 
   const singleSupports = new Set<Brick>();
   for (let i = 0; i < bricks.length; i++) {
@@ -76,48 +77,10 @@ export function part1(input: string) {
 }
 
 export function part2(input: string) {
-  let [bricks, _] = simulate(parseInput(input));
-  let fell = 0;
-  let loop = true;
+  let bricks = simulate(parseInput(input));
 
-  do {
-    const stackEdges: number[][] = [];
-    for (let i = 0; i < bricks.length; i++) {
-      stackEdges[i] = [];
-      for (let j = 0; j < bricks.length; j++) {
-        if (supporting(bricks[i], bricks[j])) stackEdges[i].push(j);
-      }
-    }
-
-    const above = stackEdges.map(() => new Set<number>());
-    const dfs = (p: number[], post: (a: number[]) => void) => {
-      stackEdges[p[0]].forEach((j) => dfs([j, ...p], post));
-      post(p);
-    };
-    dfs(
-      bricks.filter(([{ z }]) => z === 1).map((_, i) => i),
-      (parents) => {
-        for (let i = 0; i < parents.length; i++)
-          parents.slice(0, i).forEach((p) => above[parents[i]].add(p));
-      }
-    );
-    const wouldFall = above.filter((_, i) => {
-      const otherEdges = stackEdges.toSpliced(i, 1).flatMap((l) => l);
-      // console.log(stackEdges[i], otherEdges);
-      return !stackEdges[i].every((p) => otherEdges.includes(p));
-    });
-    // console.log(wouldFall);
-    if (!wouldFall.length) break;
-    const maxSet = wouldFall.reduce(
-      (m, s) => (s.size > m.size ? s : m),
-      wouldFall[0]
-    );
-    if (!maxSet.size) break;
-    const maxSeti = above.indexOf(maxSet);
-    bricks.splice(maxSeti, 1);
-    fell += maxSet.size;
-    console.log(bricks.length, fell);
-    [bricks, loop] = simulate(bricks);
-  } while (true);
-  return fell;
+  return bricks.reduce((sum, _b, i) => {
+    const [_stable, falling] = reconcile(bricks.toSpliced(i, 1));
+    return sum + falling.size;
+  }, 0);
 }
